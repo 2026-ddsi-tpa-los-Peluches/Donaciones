@@ -2,8 +2,8 @@
 # 🧪 2026 - Trabajo Práctico Anual
 
 ## 👤 Datos del Alumno
-- **Nombre:** Pablo
-- **Apellido:** Gimenez
+- **Nombre:** Santiago
+- **Apellido:** Mamani
 
 ---
 
