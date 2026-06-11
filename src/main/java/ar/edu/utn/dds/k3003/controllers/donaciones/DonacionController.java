@@ -6,6 +6,7 @@ import ar.edu.utn.dds.k3003.catedra.dtos.donaciones.EstadoDonacionEnum;
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.QuejaDTO;
 import ar.edu.utn.dds.k3003.exceptions.DonadorNoEncontradoException;
 import ar.edu.utn.dds.k3003.exceptions.donaciones.CambioEstadoInvalidoException;
+import ar.edu.utn.dds.k3003.exceptions.donaciones.DonacionInvalidaException;
 import ar.edu.utn.dds.k3003.exceptions.donaciones.DonacionNoEncontradaException;
 import ar.edu.utn.dds.k3003.exceptions.donaciones.DonadorNoAptoException;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,7 @@ public class DonacionController {
         } catch (DonadorNoEncontradoException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+
     }
 
     @GetMapping

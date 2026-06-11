@@ -20,7 +20,7 @@ public class IdentificadoresDataMapper {
 
     public IdentificadorDTO toIdentificadorDTO(Identificador identificador) {
         return new IdentificadorDTO(
-                identificador.getId(),
+                identificador.getId() != null ? identificador.getId().toString() : null,
                 identificador.getTipoIdentificador(),
                 identificador.getDescripcion()
         );

@@ -13,11 +13,11 @@ public class ProductoDataMapper {
 
     public ProductoDTO toProductoDTO(Producto producto) {
         return new ProductoDTO(
-                producto.getId(),
+                producto.getId() != null ? producto.getId().toString() : null,
                 producto.getNombre(),
                 producto.getDescripcion(),
                 producto.getSubcategoriaID(),
-                producto.getIdentificador().getId()
+                producto.getIdentificador() != null ? producto.getIdentificador().getId().toString() : null
         );
     }
 }

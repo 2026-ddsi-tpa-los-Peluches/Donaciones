@@ -13,13 +13,13 @@ public class DonacionesDataMapper {
         );
     }
 
-    public DonacionDTO toDonacionDTO(Donacion donacion){
+    public DonacionDTO toDonacionDTO(Donacion donacion) {
         return new DonacionDTO(
-                donacion.getId(),
+                donacion.getId() != null ? donacion.getId().toString() : null,
                 donacion.getDonadorID(),
                 donacion.getDepositoID(),
                 donacion.getDescripcion(),
-                donacion.getProducto().getId(),
+                donacion.getProducto() != null ? donacion.getProducto().getId().toString() : null,
                 donacion.getCantidad(),
                 donacion.getEstado()
         );

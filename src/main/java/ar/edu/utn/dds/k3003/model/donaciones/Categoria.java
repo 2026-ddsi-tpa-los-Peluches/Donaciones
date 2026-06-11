@@ -1,17 +1,29 @@
 package ar.edu.utn.dds.k3003.model.donaciones;
 
+import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Setter
 @Getter
+@NoArgsConstructor
+@Entity
+@Table(name = "categorias")
 public class Categoria {
-    String id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "nombre", nullable = false)
     private String nombre;
+
+    @Column(name = "descripcion")
     private String descripcion;
+
+    @Column(name = "subcategoria_id")
     private String subcategoriaID;
 
     public Categoria(String nombre, String descripcion, String subcategoriaID) {
@@ -21,6 +33,7 @@ public class Categoria {
     }
 
     public boolean tieneID(String categoriaID) {
-        return this.getId().equals(categoriaID);
+        return this.id != null && this.id.toString().equals(categoriaID);
     }
+
 }

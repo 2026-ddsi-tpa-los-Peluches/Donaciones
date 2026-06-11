@@ -16,7 +16,7 @@ public class CategoriaDataMapper {
 
     public CategoriaDTO toCategoriaDTO(Categoria categoria) {
         return new CategoriaDTO(
-                categoria.getId(),
+                categoria.getId() != null ? categoria.getId().toString() : null,
                 categoria.getNombre(),
                 categoria.getDescripcion(),
                 categoria.getSubcategoriaID()
