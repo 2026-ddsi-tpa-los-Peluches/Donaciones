@@ -12,6 +12,9 @@ public class LogisticaClient {
     private final String baseUrl;
 
     public LogisticaClient(@Value("${LOGISTICA_SERVICE_URL:http://localhost:8081}") String baseUrl) {
+
+        System.out.println("LOGISTICA URL = " + baseUrl);
+
         this.baseUrl = baseUrl;
     }
 

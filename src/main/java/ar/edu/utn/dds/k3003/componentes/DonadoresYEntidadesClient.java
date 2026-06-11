@@ -18,7 +18,10 @@ public class DonadoresYEntidadesClient {
     private final RestTemplate restTemplate = new RestTemplate();
     private final String baseUrl;
 
-    public DonadoresYEntidadesClient(@Value("${INCENTIVOS_SERVICE_URL:http://localhost:8081}") String baseUrl) {
+    public DonadoresYEntidadesClient(@Value("${DONADORESYENTIDADES_URL:http://localhost:8081}") String baseUrl) {
+
+        System.out.println("LOGISTICA URL = " + baseUrl);
+
         this.baseUrl = baseUrl;
     }
 
