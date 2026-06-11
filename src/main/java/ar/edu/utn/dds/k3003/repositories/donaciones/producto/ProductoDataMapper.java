@@ -7,9 +7,7 @@ public class ProductoDataMapper {
     public Producto toProducto(ProductoDTO productoDTO) {
         return new Producto(
                 productoDTO.nombre(),
-                productoDTO.descripcion(),
-                productoDTO.categoriaID(),
-                productoDTO.identificadorID()
+                productoDTO.descripcion()
         );
     }
 
@@ -18,7 +16,7 @@ public class ProductoDataMapper {
                 producto.getId() != null ? producto.getId().toString() : null,
                 producto.getNombre(),
                 producto.getDescripcion(),
-                producto.getSubcategoriaID(),
+                producto.getCategoriaID(),
                 producto.getIdentificador() != null ? producto.getIdentificador().getId().toString() : null
         );
     }

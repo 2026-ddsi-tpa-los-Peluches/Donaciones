@@ -23,13 +23,9 @@ public class Categoria {
     @Column(name = "descripcion")
     private String descripcion;
 
-    @Column(name = "subcategoria_id")
-    private String subcategoriaID;
-
-    public Categoria(String nombre, String descripcion, String subcategoriaID) {
+    public Categoria(String nombre, String descripcion) {
         this.nombre = nombre;
         this.descripcion = descripcion;
-        this.subcategoriaID = subcategoriaID;
     }
 
     public boolean tieneID(String categoriaID) {

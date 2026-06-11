@@ -57,9 +57,4 @@ public class Producto {
         return this.categoria != null ? this.categoria.getId().toString() : null;
     }
 
-    public void setCategoriaID(String categoriaID) {
-
-
-    }
-
 }

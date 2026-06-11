@@ -13,7 +13,7 @@ public interface ProductoRepository {
 
     void actualizar(Producto producto);
 
-    List<Producto> buscarPorSubcategoria(String subcategoriaID);
+    List<Producto> buscarPorCategoria(String categoriaID);
 
     List<Producto> buscarTodos();
 

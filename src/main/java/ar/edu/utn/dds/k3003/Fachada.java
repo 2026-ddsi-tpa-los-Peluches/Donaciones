@@ -12,6 +12,7 @@ import ar.edu.utn.dds.k3003.exceptions.donaciones.DonacionInvalidaException;
 import ar.edu.utn.dds.k3003.exceptions.donaciones.DonadorNoAptoException;
 import ar.edu.utn.dds.k3003.exceptions.donaciones.DonacionNoEncontradaException;
 import ar.edu.utn.dds.k3003.exceptions.donaciones.IdentificadorNoEncontradoException;
+import ar.edu.utn.dds.k3003.exceptions.donaciones.CategoriaNoEncontradaException;
 import ar.edu.utn.dds.k3003.exceptions.donaciones.ProductoNoEncontradoException;
 import ar.edu.utn.dds.k3003.model.donaciones.*;
 import ar.edu.utn.dds.k3003.repositories.donaciones.categoria.CategoriaDataMapper;
@@ -181,22 +182,6 @@ public class Fachada implements FachadaDonaciones {
         this.verificarProductoIngresado(productoDTO);
         val producto = this.productoDataMapper.toProducto(productoDTO);
 
-        if(productoDTO.identificadorID() != null){
-
-            Long identificadorLongID = Long.parseLong(productoDTO.identificadorID());
-
-            producto.setIdentificador(this.identificadoresRepository.findById(identificadorLongID).orElseThrow());
-        }
-
-        if(productoDTO.categoriaID() != null){
-
-            Long categoriaLongID = Long.parseLong(productoDTO.categoriaID());
-
-            producto.setSubcategoria(this.cate.findById(categoriaLongID).orElseThrow());
-        }
-
-
-
         // Asociar identificador
         if (productoDTO.identificadorID() != null) {
             Identificador identificador = identificadoresRepository.findById(Long.parseLong(productoDTO.identificadorID()))
@@ -205,11 +190,11 @@ public class Fachada implements FachadaDonaciones {
             producto.setIdentificador(identificador);
         }
 
-        // Asociar subcategoria via categoria
+        // Asociar categoria
         if (productoDTO.categoriaID() != null) {
             Categoria categoria = categoriaRepository.findById(Long.parseLong(productoDTO.categoriaID()))
-                    .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
-            // Buscamos subcategoria dentro de la categoria (si aplica)
+                    .orElseThrow(() -> new CategoriaNoEncontradaException("Categoría no encontrada"));
+            producto.setCategoria(categoria);
         }
 
         val productoGuardado = this.productoRepository.save(producto);

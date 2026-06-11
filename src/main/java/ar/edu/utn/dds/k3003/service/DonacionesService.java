@@ -68,14 +68,12 @@ public class DonacionesService {
     public Producto darAltaProducto(Producto producto, String categoriaID, String identificadorID) {
         val identificador = this.buscarIdentificador(identificadorID);
 
-        String subcategoriaID = null;
         if (categoriaID != null) {
-            subcategoriaID = this.buscarSubcategoria(categoriaID);
+            producto.setCategoria(this.buscarCategoria(categoriaID));
         }
 
         identificador.validar(producto);
         producto.setIdentificador(identificador);
-        producto.setSubcategoriaID(subcategoriaID);
 
         return this.productoRepository.save(producto);
     }
@@ -85,10 +83,9 @@ public class DonacionesService {
                 .orElseThrow(() -> new IdentificadorNoEncontradoException("No se encontró identificador con ID " + identificadorID));
     }
 
-    public String buscarSubcategoria(String categoriaID) {
-        val categoria = this.categoriaRepository.findById(Long.parseLong(categoriaID))
+    public Categoria buscarCategoria(String categoriaID) {
+        return this.categoriaRepository.findById(Long.parseLong(categoriaID))
                 .orElseThrow(() -> new CategoriaNoEncontradaException("No se encontró categoría con ID " + categoriaID));
-        return categoria.getSubcategoriaID();
     }
 
     public Identificador darAltaIdentificador(Identificador identificador) {
@@ -114,11 +111,12 @@ public class DonacionesService {
     public Producto actualizarProducto(String id, ProductoDTO actualizacion) {
         val producto = this.buscarProducto(id);
         val identificador = this.buscarIdentificador(actualizacion.identificadorID());
-        val subcategoriaID = this.buscarSubcategoria(actualizacion.categoriaID());
 
         producto.setNombre(actualizacion.nombre());
         producto.setDescripcion(actualizacion.descripcion());
-        producto.setSubcategoriaID(subcategoriaID);
+        if (actualizacion.categoriaID() != null) {
+            producto.setCategoria(this.buscarCategoria(actualizacion.categoriaID()));
+        }
         producto.setIdentificador(identificador);
 
         return this.productoRepository.save(producto);
