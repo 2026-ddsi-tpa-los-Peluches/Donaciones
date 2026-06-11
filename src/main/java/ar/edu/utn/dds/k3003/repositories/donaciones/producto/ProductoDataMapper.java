@@ -7,7 +7,9 @@ public class ProductoDataMapper {
     public Producto toProducto(ProductoDTO productoDTO) {
         return new Producto(
                 productoDTO.nombre(),
-                productoDTO.descripcion()
+                productoDTO.descripcion(),
+                productoDTO.categoriaID(),
+                productoDTO.identificadorID()
         );
     }
 

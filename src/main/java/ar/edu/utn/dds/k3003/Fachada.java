@@ -181,6 +181,22 @@ public class Fachada implements FachadaDonaciones {
         this.verificarProductoIngresado(productoDTO);
         val producto = this.productoDataMapper.toProducto(productoDTO);
 
+        if(productoDTO.identificadorID() != null){
+
+            Long identificadorLongID = Long.parseLong(productoDTO.identificadorID());
+
+            producto.setIdentificador(this.identificadoresRepository.findById(identificadorLongID).orElseThrow());
+        }
+
+        if(productoDTO.categoriaID() != null){
+
+            Long categoriaLongID = Long.parseLong(productoDTO.categoriaID());
+
+            producto.setSubcategoria(this.cate.findById(categoriaLongID).orElseThrow());
+        }
+
+
+
         // Asociar identificador
         if (productoDTO.identificadorID() != null) {
             Identificador identificador = identificadoresRepository.findById(Long.parseLong(productoDTO.identificadorID()))

@@ -21,8 +21,8 @@ public class Producto {
     private String descripcion;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subcategoria_id")
-    private Subcategoria subcategoria;
+    @JoinColumn(name = "categoria_id")
+    private Categoria categoria;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "identificador_id")
@@ -30,25 +30,36 @@ public class Producto {
 
     protected Producto() {}
 
-    public Producto(String nombre, String descripcion) {
+    public Producto(String nombre, String descripcion ) {
         this.nombre = nombre;
         this.descripcion = descripcion;
     }
+
+
+    public Producto(String nombre, String descripcion,Categoria categoria,Identificador identificador) {
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.identificador = identificador;
+        this.categoria = categoria;
+    }
+
 
     public boolean tieneID(String id) {
         return this.id != null && this.id.toString().equals(id);
     }
 
-    public boolean tieneSubcategoria(String subcategoriaID) {
-        return this.subcategoria != null
-                && this.subcategoria.getId().toString().equals(subcategoriaID);
+    public boolean tieneCategoria(String categoriaID) {
+        return this.categoria != null
+                && this.categoria.getId().toString().equals(categoriaID);
     }
 
-    public String getSubcategoriaID() {
-        return this.subcategoria != null ? this.subcategoria.getId().toString() : null;
+    public String getCategoriaID() {
+        return this.categoria != null ? this.categoria.getId().toString() : null;
     }
 
-    public void setSubcategoriaID(String subcategoriaID) {
+    public void setCategoriaID(String categoriaID) {
+
+
     }
 
 }
