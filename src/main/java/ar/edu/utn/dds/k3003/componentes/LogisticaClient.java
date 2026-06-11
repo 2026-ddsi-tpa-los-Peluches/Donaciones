@@ -1,11 +1,12 @@
 package ar.edu.utn.dds.k3003.componentes;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-// ¡Acordate de importar el Map y HashMap!
 import java.util.HashMap;
 import java.util.Map;
 
+@Service
 public class LogisticaClient {
 
     private final RestTemplate restTemplate = new RestTemplate();
