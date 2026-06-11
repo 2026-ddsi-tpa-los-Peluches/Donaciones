@@ -5,6 +5,9 @@ import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.QuejaDTO;
 import ar.edu.utn.dds.k3003.catedra.fachadas.FachadaDonaciones;
 import ar.edu.utn.dds.k3003.catedra.fachadas.FachadaDonadoresYEntidades;
 import ar.edu.utn.dds.k3003.catedra.fachadas.FachadaLogistica;
+import ar.edu.utn.dds.k3003.componentes.DonadoresYEntidadesClient;
+import ar.edu.utn.dds.k3003.componentes.LogisticaClient;
+import ar.edu.utn.dds.k3003.exceptions.DonadorNoEncontradoException;
 import ar.edu.utn.dds.k3003.exceptions.donaciones.DonacionInvalidaException;
 import ar.edu.utn.dds.k3003.exceptions.donaciones.DonadorNoAptoException;
 import ar.edu.utn.dds.k3003.exceptions.donaciones.DonacionNoEncontradaException;
@@ -25,6 +28,7 @@ import org.springframework.stereotype.Service;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import org.springframework.web.client.HttpServerErrorException;
 
 
 import java.time.LocalDate;
@@ -44,9 +48,14 @@ public class Fachada implements FachadaDonaciones {
     @Autowired
     private CategoriaRepositoryJPA categoriaRepository;
 
-    // Fachadas externas inyectadas por Spring
-    private FachadaDonadoresYEntidades fachadaDonadoresYEntidades;
-    private FachadaLogistica fachadaLogistica;
+
+
+    @Autowired
+    private LogisticaClient logisticaClient;
+
+    @Autowired
+    private DonadoresYEntidadesClient donadoresYEntidadesClient;
+
 
     // Mappers (no son beans, se instancian directamente)
     private final DonacionesDataMapper donacionesDataMapper = new DonacionesDataMapper();
@@ -98,10 +107,12 @@ public class Fachada implements FachadaDonaciones {
 
                 val donacionGuardada = this.donacionesRepository.save(donacion);
 
-                fachadaLogistica.gestionarDonacion(
+                this.logisticaClient.gestionarDonacion(
                         donacionGuardada.getDepositoID(),
                         donacionGuardada.getId().toString(),
-                        donacionGuardada.getProducto() != null ? donacionGuardada.getProducto().getId().toString() : null,
+                        donacionGuardada.getProducto() != null
+                                ? donacionGuardada.getProducto().getId().toString()
+                                : null,
                         donacionGuardada.getCantidad()
                 );
 
@@ -146,10 +157,10 @@ public class Fachada implements FachadaDonaciones {
 
         QuejaDTO quejaDTO = new QuejaDTO(null, donacionID, donacion.getDonadorID(), LocalDate.now(), descripcion);
 
-        this.fachadaDonadoresYEntidades.agregarQueja(quejaDTO);
-
         donacion.agregarQueja(descripcion);
+
         this.donacionesRepository.save(donacion);
+        this.donadoresYEntidadesClient.agregarQueja(quejaDTO);
 
         return this.donacionesDataMapper.toDonacionDTO(donacion);
     }
@@ -278,10 +289,23 @@ public class Fachada implements FachadaDonaciones {
 
     private void verificarDonador(String donadorID) {
 
-         this.fachadaDonadoresYEntidades.buscarDonadorPorID(donadorID);
-         if (!fachadaDonadoresYEntidades.puedeDonar(donadorID)) {
+        try {
 
-         throw new DonadorNoAptoException("El donador no se encuentra apto para donar");
+            if (!donadoresYEntidadesClient.puedeDonar(donadorID)) {
+                throw new DonadorNoAptoException(
+                        "El donador no se encuentra apto para donar");
+            }
+
+        } catch (HttpServerErrorException e) {
+
+            if (e.getResponseBodyAsString()
+                    .contains("No existe el donador")) {
+
+                throw new DonadorNoEncontradoException(
+                        e.getResponseBodyAsString());
+            }
+
+            throw e;
         }
     }
 
