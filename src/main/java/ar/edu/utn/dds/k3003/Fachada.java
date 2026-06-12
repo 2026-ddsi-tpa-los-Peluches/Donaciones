@@ -65,27 +65,19 @@ public class Fachada implements FachadaDonaciones {
     private final CategoriaDataMapper categoriaDataMapper = new CategoriaDataMapper();
 
     // Métricas
-    private final MeterRegistry meterRegistry;
     private final Counter cantDonacionesRegistradas;
     private final Counter cantDonacionesFallidas;
     private final Timer tiempoRegistroDonacion;
 
     // Constructor vacío requerido por Spring/JPA
     public Fachada(MeterRegistry meterRegistry) {
-        this.meterRegistry = meterRegistry;
 
         this.cantDonacionesRegistradas = Counter.builder("donaciones.registradas")
-                .description("Cantidad de donaciones registradas")
-                .tag("modulo", "donaciones")
                 .register(meterRegistry);
         this.cantDonacionesFallidas = Counter.builder("donaciones.fallidas")
-                .description("Cantidad de intentos de donación fallidos")
-                .tag("modulo", "donaciones")
                 .register(meterRegistry);
 
         this.tiempoRegistroDonacion = Timer.builder("donaciones.registro.tiempo")
-                .description("Tiempo que tarda en registrarse una donación")
-                .tag("modulo", "donaciones")
                 .register(meterRegistry);
     }
 
@@ -93,7 +85,7 @@ public class Fachada implements FachadaDonaciones {
     @Override
     public DonacionDTO registrarDonacion(DonacionDTO donacionDTO) {
         // Timer mide el tiempo de ejecución completo
-        return tiempoRegistroDonacion.record(() -> {
+
             try {
                 this.verificarDonacionIngresada(donacionDTO);
                 this.verificarDonador(donacionDTO.donadorID());
@@ -126,7 +118,6 @@ public class Fachada implements FachadaDonaciones {
                 cantDonacionesFallidas.increment();
                 throw e;
             }
-        });
     }
 
     @Override
@@ -182,18 +173,28 @@ public class Fachada implements FachadaDonaciones {
         this.verificarProductoIngresado(productoDTO);
         val producto = this.productoDataMapper.toProducto(productoDTO);
 
+
+
+
+
+
         // Asociar identificador
         if (productoDTO.identificadorID() != null) {
+
+
             Identificador identificador = identificadoresRepository.findById(Long.parseLong(productoDTO.identificadorID()))
                     .orElseThrow(() -> new IdentificadorNoEncontradoException("Identificador no encontrado"));
-            identificador.validar(producto);
+
             producto.setIdentificador(identificador);
+
+            identificador.validar(producto);
         }
 
         // Asociar categoria
         if (productoDTO.categoriaID() != null) {
             Categoria categoria = categoriaRepository.findById(Long.parseLong(productoDTO.categoriaID()))
                     .orElseThrow(() -> new CategoriaNoEncontradaException("Categoría no encontrada"));
+
             producto.setCategoria(categoria);
         }
 

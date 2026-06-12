@@ -10,9 +10,9 @@ public class CodigoQR implements TipoIdentificador {
 
     @Override
     public boolean esValido(Producto producto) {
-        val cantidadDeLetras = producto.getNombre().length();
+        val tipoIdentificador = producto.getIdentificador().getTipoIdentificador();
 
-        return  this.esPar(cantidadDeLetras);
+        return  tipoIdentificador == TipoIdentificadorEnum.QR;
     }
 
     @Override

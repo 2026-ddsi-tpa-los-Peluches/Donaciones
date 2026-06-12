@@ -10,9 +10,9 @@ public class CodigoDeBarras implements TipoIdentificador {
 
     @Override
     public boolean esValido(Producto producto) {
-        val cantidadDePalabras = producto.getDescripcion().trim().split("\\s+").length;
+        val tipoIdentificador = producto.getIdentificador().getTipoIdentificador();
 
-        return cantidadDePalabras >= 3;
+        return tipoIdentificador == TipoIdentificadorEnum.CODIGODEBARRAS;
     }
 
     @Override
