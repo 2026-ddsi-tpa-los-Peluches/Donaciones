@@ -147,7 +147,7 @@ public class Fachada implements FachadaDonaciones {
 
     @Override
     public List<DonacionDTO> buscarPorDonadorYFechaInicio(String donadorID, LocalDate fecha) throws NoSuchElementException {
-        val donaciones = this.donacionesRepository.findByDonadorIDAndFechaGreaterThanEqual(donadorID, fecha);
+        val donaciones = this.donacionesRepository.findByDonadorIDAndFechaGreaterThanEqualOrderByFechaAsc(donadorID, fecha);
         return donaciones.stream().map(this.donacionesDataMapper::toDonacionDTO).toList();
     }
 

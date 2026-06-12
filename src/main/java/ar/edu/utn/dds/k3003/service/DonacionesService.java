@@ -51,7 +51,7 @@ public class DonacionesService {
     }
 
     public List<Donacion> buscarDonacionPorDonadorYFechaInicio(String donadorID, LocalDate fecha) {
-        val donaciones = this.donacionesRepository.findByDonadorIDAndFechaGreaterThanEqual(donadorID, fecha);
+        val donaciones = this.donacionesRepository.findByDonadorIDAndFechaGreaterThanEqualOrderByFechaAsc(donadorID, fecha);
         if (donaciones.isEmpty()) {
             throw new DonacionNoEncontradaException(
                     "No se encontraron donaciones para el donador con ID " + donadorID + " a partir de la fecha " + fecha);
