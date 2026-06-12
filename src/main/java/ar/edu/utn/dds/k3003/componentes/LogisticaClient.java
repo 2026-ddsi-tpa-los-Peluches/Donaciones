@@ -1,5 +1,7 @@
 package ar.edu.utn.dds.k3003.componentes;
 
+import ar.edu.utn.dds.k3003.controllers.DonadorRequest;
+import ar.edu.utn.dds.k3003.model.Donador;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -21,19 +23,13 @@ public class LogisticaClient {
 
     public void gestionarDonacion(String depositoID, String donacionID, String productoID, Integer cantidad) {
         try {
-            // 1. Armamos la URL igual que en el Swagger: /depositos/{id}/donacion
             String url = baseUrl + "/depositos/" + depositoID + "/donacion";
 
-            // 2. Armamos el body con el JSON que pide la documentación
-            Map<String, Object> body = new HashMap<>();
-            body.put("depositoID", depositoID);
-            body.put("donacionID", donacionID);
-            body.put("productoID", productoID);
-            body.put("cantidad", cantidad);
+            // Creamos el objeto en una sola línea, limpio y tipado
+            DonadorRequest request= new DonadorRequest(depositoID, donacionID, productoID, cantidad);
 
-            // 3. Hacemos el POST directo. Usamos Void.class porque el endpoint
-            // no devuelve un body que nos interese mapear (suele devolver 200 OK o 201).
-            restTemplate.postForEntity(url, body, Void.class);
+            // RestTemplate se encarga solo de transformarlo a JSON
+            restTemplate.postForEntity(url, request, Void.class);
 
         } catch (Exception e) {
             throw new RuntimeException("Error de comunicación al gestionar la donación en Logística", e);
