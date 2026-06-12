@@ -2,6 +2,8 @@ package ar.edu.utn.dds.k3003.controllers.donaciones;
 
 import ar.edu.utn.dds.k3003.Fachada;
 import ar.edu.utn.dds.k3003.catedra.dtos.donaciones.DonacionDTO;
+import ar.edu.utn.dds.k3003.model.donaciones.Donacion.EstadoRequestDTO;
+import ar.edu.utn.dds.k3003.model.donaciones.Donacion.QuejaRequestDTO;
 import ar.edu.utn.dds.k3003.catedra.dtos.donaciones.EstadoDonacionEnum;
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.QuejaDTO;
 import ar.edu.utn.dds.k3003.exceptions.DonadorNoEncontradoException;
@@ -9,6 +11,7 @@ import ar.edu.utn.dds.k3003.exceptions.donaciones.CambioEstadoInvalidoException;
 import ar.edu.utn.dds.k3003.exceptions.donaciones.DonacionInvalidaException;
 import ar.edu.utn.dds.k3003.exceptions.donaciones.DonacionNoEncontradaException;
 import ar.edu.utn.dds.k3003.exceptions.donaciones.DonadorNoAptoException;
+import ar.edu.utn.dds.k3003.model.donaciones.Donacion;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -82,9 +85,9 @@ public class DonacionController {
     }
 
     @PatchMapping("/{id}/estado")
-    public ResponseEntity<DonacionDTO> ModificarEstadoDeDonacion(@PathVariable String id, @RequestBody EstadoDonacionEnum estado) {
+    public ResponseEntity<DonacionDTO> ModificarEstadoDeDonacion(@PathVariable String id, @RequestBody EstadoRequestDTO estado) {
         try {
-            DonacionDTO donacionActualizada = this.fachada.cambiarEstadoDeDonacion(id, estado);
+            DonacionDTO donacionActualizada = this.fachada.cambiarEstadoDeDonacion(id, estado.estado());
             return  ResponseEntity.ok(donacionActualizada);
         } catch (CambioEstadoInvalidoException e) {
          return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -94,10 +97,10 @@ public class DonacionController {
     }
 
     @PostMapping("/{id}/queja")
-    public ResponseEntity<DonacionDTO> registrarQuejaSobreDonacion(@PathVariable String id, @RequestBody QuejaDTO queja) {
+    public ResponseEntity<DonacionDTO> registrarQuejaSobreDonacion(@PathVariable String id, @RequestBody QuejaRequestDTO descripcion) {
         try {
-            String descripcion = queja.descripcion();
-            DonacionDTO donacionActualizada = this.fachada.registrarQuejaEnDonacion(id,descripcion);
+            String descripcionaux= descripcion.descripcion();
+            DonacionDTO donacionActualizada = this.fachada.registrarQuejaEnDonacion(id,descripcionaux);
             return ResponseEntity.status(HttpStatus.CREATED).body(donacionActualizada);
         } catch (DonacionNoEncontradaException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

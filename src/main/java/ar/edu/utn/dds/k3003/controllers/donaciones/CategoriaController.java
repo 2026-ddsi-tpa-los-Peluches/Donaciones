@@ -38,7 +38,7 @@ public class CategoriaController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<CategoriaDTO> eliminarCategoria(@RequestBody String id) {
+    public ResponseEntity<CategoriaDTO> eliminarCategoria(@PathVariable String id) {
         try {
             this.fachada.eliminarCategoria(id);
             return ResponseEntity.noContent().build();

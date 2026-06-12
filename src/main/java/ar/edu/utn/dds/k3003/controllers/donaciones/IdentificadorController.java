@@ -37,7 +37,7 @@ public class IdentificadorController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<IdentificadorDTO> eliminarIdentificador(@RequestBody String id) {
+    public ResponseEntity<IdentificadorDTO> eliminarIdentificador(@PathVariable String id) {
         try {
             this.fachada.eliminarIdentificador(id);
             return ResponseEntity.noContent().build();

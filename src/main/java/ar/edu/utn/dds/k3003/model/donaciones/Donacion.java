@@ -88,4 +88,10 @@ public class Donacion {
     public boolean aPartirDeFecha(LocalDate fecha) {
         return !this.fecha.isBefore(fecha);
     }
+
+    public record EstadoRequestDTO(EstadoDonacionEnum estado) {}
+
+    public record QuejaRequestDTO(String descripcion) {}
+
+
 }

@@ -8,6 +8,7 @@ import ar.edu.utn.dds.k3003.model.donaciones.Categoria;
 public class CategoriaDataMapper {
     public Categoria toCategoria(CategoriaDTO categoriaDTO) {
         return new Categoria(
+
                 categoriaDTO.nombre(),
                 categoriaDTO.descripcion()
         );
