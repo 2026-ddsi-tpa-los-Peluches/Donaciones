@@ -10,5 +10,5 @@ import java.util.List;
 
 @Repository
 public interface DonacionesRepositoryJPA extends JpaRepository<Donacion, Long> {
-    List<Donacion> findByDonadorIDAndFechaGreaterThanEqual(String donadorID, LocalDate fecha);
+    List<Donacion> findByDonadorIDAndFechaGreaterThanEqualOrderByFechaAsc(String donadorID, LocalDate fecha);
 }
