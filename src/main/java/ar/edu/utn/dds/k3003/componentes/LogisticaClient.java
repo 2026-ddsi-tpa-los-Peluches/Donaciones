@@ -14,7 +14,7 @@ public class LogisticaClient {
     private final RestTemplate restTemplate = new RestTemplate();
     private final String baseUrl;
 
-    public LogisticaClient(@Value("${LOGISTICA_SERVICE_URL:http://localhost:8081}") String baseUrl) {
+    public LogisticaClient(@Value("${LOGISTICA_SERVICE_URL}") String baseUrl) {
 
         System.out.println("LOGISTICA URL = " + baseUrl);
 
