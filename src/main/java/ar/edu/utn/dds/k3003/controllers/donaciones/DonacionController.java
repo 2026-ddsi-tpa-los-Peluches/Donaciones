@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 @RestController
@@ -85,8 +86,9 @@ public class DonacionController {
     }
 
     @PatchMapping("/{id}/estado")
-    public ResponseEntity<DonacionDTO> ModificarEstadoDeDonacion(@PathVariable String id, @RequestBody EstadoDonacionEnum estado) {
+    public ResponseEntity<DonacionDTO> ModificarEstadoDeDonacion(@PathVariable String id, @RequestBody Map<String, String> body) {
         try {
+            EstadoDonacionEnum estado = EstadoDonacionEnum.valueOf(body.get("estado"));
             DonacionDTO donacionActualizada = this.fachada.cambiarEstadoDeDonacion(id, estado);
             return  ResponseEntity.ok(donacionActualizada);
         } catch (CambioEstadoInvalidoException e) {
