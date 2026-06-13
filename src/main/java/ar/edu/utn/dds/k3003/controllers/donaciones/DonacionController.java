@@ -85,9 +85,9 @@ public class DonacionController {
     }
 
     @PatchMapping("/{id}/estado")
-    public ResponseEntity<DonacionDTO> ModificarEstadoDeDonacion(@PathVariable String id, @RequestBody EstadoRequestDTO estado) {
+    public ResponseEntity<DonacionDTO> ModificarEstadoDeDonacion(@PathVariable String id, @RequestBody EstadoDonacionEnum estado) {
         try {
-            DonacionDTO donacionActualizada = this.fachada.cambiarEstadoDeDonacion(id, estado.estado());
+            DonacionDTO donacionActualizada = this.fachada.cambiarEstadoDeDonacion(id, estado);
             return  ResponseEntity.ok(donacionActualizada);
         } catch (CambioEstadoInvalidoException e) {
          return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
