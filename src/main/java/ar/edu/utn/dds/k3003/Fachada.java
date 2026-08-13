@@ -204,10 +204,18 @@ public class Fachada implements FachadaDonaciones {
 
     @Override
     public ProductoDTO buscarProductoPorID(String productoID) throws NoSuchElementException {
-        val producto = this.productoRepository.findById(Long.parseLong(productoID))
-                .orElseThrow(() -> new ProductoNoEncontradoException("Producto no encontrado: " + productoID));
-        return this.productoDataMapper.toProductoDTO(producto);
+        try {
+            Long id = Long.parseLong(productoID);
+            val producto = this.productoRepository.findById(id)
+                    .orElseThrow(() -> new ProductoNoEncontradoException("Producto no encontrado: " + productoID));
+            return this.productoDataMapper.toProductoDTO(producto);
+        } catch (NumberFormatException e) {
+            // Si el ID no es numérico (ej: "PROD-101"), lanzamos la misma excepción
+            throw new ProductoNoEncontradoException("Producto no encontrado : " + productoID);
+        }
     }
+
+
 
     public List<ProductoDTO> obtenerTodosLosProductos() {
         return this.productoRepository.findAll().stream()

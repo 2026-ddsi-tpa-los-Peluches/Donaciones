@@ -37,12 +37,14 @@ public class ProductoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductoDTO> buscarProducto(@PathVariable  String id) {
+    public ResponseEntity<Object> buscarProducto(@PathVariable String id) {
         try {
             ProductoDTO producto = this.fachada.buscarProductoPorID(id);
             return ResponseEntity.ok(producto);
-        } catch (ProductoNoEncontradoException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (ProductoNoEncontradoException | NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error en la solicitud del producto.");
         }
     }
 
