@@ -29,7 +29,10 @@ import org.springframework.stereotype.Service;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.Gauge;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.web.client.HttpServerErrorException;
+
 
 
 import java.time.LocalDate;
@@ -67,7 +70,10 @@ public class Fachada implements FachadaDonaciones {
     // Métricas
     private final Counter cantDonacionesRegistradas;
     private final Counter cantDonacionesFallidas;
-    private final Timer tiempoRegistroDonacion;
+    //private final Timer tiempoRegistroDonacion;
+    private final Counter cantProductosRegistrados;
+    private final Counter cantQuejasRegistradas;
+    private final Counter cantCategoriasRegistradas;
 
     // Constructor vacío requerido por Spring/JPA
     public Fachada(MeterRegistry meterRegistry) {
@@ -76,9 +82,27 @@ public class Fachada implements FachadaDonaciones {
                 .register(meterRegistry);
         this.cantDonacionesFallidas = Counter.builder("donaciones.fallidas")
                 .register(meterRegistry);
+        // this.tiempoRegistroDonacion = Timer.builder("donaciones.registro.tiempo")
+        //         .register(meterRegistry);
 
-        this.tiempoRegistroDonacion = Timer.builder("donaciones.registro.tiempo")
+        this.cantProductosRegistrados = Counter.builder("productos.registrados")
                 .register(meterRegistry);
+
+        this.cantQuejasRegistradas = Counter.builder("quejas.registradas")
+                .description("Cantidad total de quejas registradas, independientemente de la donación")
+                .register(meterRegistry);
+        this.cantCategoriasRegistradas = Counter.builder("cateorias.registradas")
+                .register(meterRegistry);
+
+        // cantidad de donaciones actuales en tiempo real, o sea si se elima una donacion, impacta
+        Gauge.builder("donaciones.activas", donacionesRepository, CrudRepository::count)
+                .description("Cantidad de donaciones actualmente existentes")
+                .register(meterRegistry);
+
+        Gauge.builder("productos.activos", productoRepository, CrudRepository::count)
+                .description("Cantidad de productos actualmente existentes")
+                .register(meterRegistry);
+
     }
 
     /*------------------------------------------------------------Donaciones--------------------------------------------------------------------------------- */
@@ -154,6 +178,8 @@ public class Fachada implements FachadaDonaciones {
         this.donacionesRepository.save(donacion);
         this.donadoresYEntidadesClient.agregarQueja(quejaDTO);
 
+        cantQuejasRegistradas.increment();
+
         return this.donacionesDataMapper.toDonacionDTO(donacion);
     }
 
@@ -199,6 +225,7 @@ public class Fachada implements FachadaDonaciones {
         }
 
         val productoGuardado = this.productoRepository.save(producto);
+        cantProductosRegistrados.increment();
         return this.productoDataMapper.toProductoDTO(productoGuardado);
     }
 
@@ -277,6 +304,9 @@ public class Fachada implements FachadaDonaciones {
         this.verificarCategoriaIngresada(categoriaDTO);
         val categoria = this.categoriaDataMapper.toCategoria(categoriaDTO);
         val guardada = this.categoriaRepository.save(categoria);
+
+        cantCategoriasRegistradas.increment();
+
         return this.categoriaDataMapper.toCategoriaDTO(guardada);
     }
 
