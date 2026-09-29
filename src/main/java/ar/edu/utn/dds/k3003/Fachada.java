@@ -23,6 +23,7 @@ import ar.edu.utn.dds.k3003.repositories.donaciones.identificador.Identificadore
 import ar.edu.utn.dds.k3003.repositories.donaciones.identificador.IdentificadoresRepositoryJPA;
 import ar.edu.utn.dds.k3003.repositories.donaciones.producto.ProductoDataMapper;
 import ar.edu.utn.dds.k3003.repositories.donaciones.producto.ProductoRepositoryJPA;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,12 +34,11 @@ import io.micrometer.core.instrument.Gauge;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.web.client.HttpServerErrorException;
 
-
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+@Slf4j
 @Service
 public class Fachada implements FachadaDonaciones {
 
@@ -52,14 +52,11 @@ public class Fachada implements FachadaDonaciones {
     @Autowired
     private CategoriaRepositoryJPA categoriaRepository;
 
-
-
     @Autowired
     private LogisticaClient logisticaClient;
 
     @Autowired
     private DonadoresYEntidadesClient donadoresYEntidadesClient;
-
 
     // Mappers (no son beans, se instancian directamente)
     private final DonacionesDataMapper donacionesDataMapper = new DonacionesDataMapper();
@@ -108,40 +105,50 @@ public class Fachada implements FachadaDonaciones {
     /*------------------------------------------------------------Donaciones--------------------------------------------------------------------------------- */
     @Override
     public DonacionDTO registrarDonacion(DonacionDTO donacionDTO) {
-        // Timer mide el tiempo de ejecución completo
+        try {
+            this.verificarDonacionIngresada(donacionDTO);
+            this.verificarDonador(donacionDTO.donadorID());
 
-            try {
-                this.verificarDonacionIngresada(donacionDTO);
-                this.verificarDonador(donacionDTO.donadorID());
+            val donacion = this.donacionesDataMapper.toDonacion(donacionDTO);
 
-                val donacion = this.donacionesDataMapper.toDonacion(donacionDTO);
-
-                if (donacionDTO.productoID() != null) {
-                    Producto producto = productoRepository.findById(Long.parseLong(donacionDTO.productoID()))
-                            .orElseThrow(() -> new ProductoNoEncontradoException("Producto no encontrado"));
-                    donacion.setProducto(producto);
-                }
-
-                val donacionGuardada = this.donacionesRepository.save(donacion);
-
-                this.logisticaClient.gestionarDonacion(
-                        donacionGuardada.getDepositoID(),
-                        donacionGuardada.getId().toString(),
-                        donacionGuardada.getProducto() != null
-                                ? donacionGuardada.getProducto().getId().toString()
-                                : null,
-                        donacionGuardada.getCantidad()
-                );
-
-                cantDonacionesRegistradas.increment();
-
-                return this.donacionesDataMapper.toDonacionDTO(donacionGuardada);
-
-            } catch (Exception e) {
-                // Incrementamos el counter de fallo
-                cantDonacionesFallidas.increment();
-                throw e;
+            if (donacionDTO.productoID() != null) {
+                Producto producto = productoRepository.findById(Long.parseLong(donacionDTO.productoID()))
+                        .orElseThrow(() -> new ProductoNoEncontradoException("Producto no encontrado"));
+                donacion.setProducto(producto);
             }
+
+            val donacionGuardada = this.donacionesRepository.save(donacion);
+
+            this.logisticaClient.gestionarDonacion(
+                    donacionGuardada.getDepositoID(),
+                    donacionGuardada.getId().toString(),
+                    donacionGuardada.getProducto() != null
+                            ? donacionGuardada.getProducto().getId().toString()
+                            : null,
+                    donacionGuardada.getCantidad()
+            );
+
+            cantDonacionesRegistradas.increment();
+
+            log.info("Donación creada: id={}, donadorID={}, depositoID={}, cantidad={}",
+                    donacionGuardada.getId(), donacionGuardada.getDonadorID(),
+                    donacionGuardada.getDepositoID(), donacionGuardada.getCantidad());
+
+            return this.donacionesDataMapper.toDonacionDTO(donacionGuardada);
+
+        } catch (Exception e) {
+            // Incrementamos el counter de fallo
+            cantDonacionesFallidas.increment();
+            if (e instanceof DonacionInvalidaException
+                    || e instanceof DonadorNoAptoException
+                    || e instanceof DonadorNoEncontradoException
+                    || e instanceof ProductoNoEncontradoException) {
+                log.warn("Registro de donación rechazado: {}", e.getMessage());
+            } else {
+                log.error("Error inesperado al registrar donación", e);
+            }
+            throw e;
+        }
     }
 
     @Override
@@ -157,6 +164,7 @@ public class Fachada implements FachadaDonaciones {
                 .orElseThrow(() -> new DonacionNoEncontradaException("Donación no encontrada: " + donacionID));
         donacion.cambiarEstado(estado);
         this.donacionesRepository.save(donacion);
+        log.info("Estado de donación cambiado: id={}, estado={}", donacionID, estado);
         return this.donacionesDataMapper.toDonacionDTO(donacion);
     }
 
@@ -180,6 +188,8 @@ public class Fachada implements FachadaDonaciones {
 
         cantQuejasRegistradas.increment();
 
+        log.info("Queja creada: donacionID={}, donadorID={}", donacionID, donacion.getDonadorID());
+
         return this.donacionesDataMapper.toDonacionDTO(donacion);
     }
 
@@ -190,6 +200,7 @@ public class Fachada implements FachadaDonaciones {
 
     public void eliminarDonacion(String id) {
         this.donacionesRepository.deleteById(Long.parseLong(id));
+        log.info("Donación eliminada: id={}", id);
     }
 
     /*------------------------------------------------------------Productos--------------------------------------------------------------------------------- */
@@ -199,14 +210,8 @@ public class Fachada implements FachadaDonaciones {
         this.verificarProductoIngresado(productoDTO);
         val producto = this.productoDataMapper.toProducto(productoDTO);
 
-
-
-
-
-
         // Asociar identificador
         if (productoDTO.identificadorID() != null) {
-
 
             Identificador identificador = identificadoresRepository.findById(Long.parseLong(productoDTO.identificadorID()))
                     .orElseThrow(() -> new IdentificadorNoEncontradoException("Identificador no encontrado"));
@@ -226,7 +231,11 @@ public class Fachada implements FachadaDonaciones {
 
         val productoGuardado = this.productoRepository.save(producto);
         cantProductosRegistrados.increment();
-        return this.productoDataMapper.toProductoDTO(productoGuardado);
+
+        val resultado = this.productoDataMapper.toProductoDTO(productoGuardado);
+        log.info("Producto creado: id={}, identificadorID={}, categoriaID={}",
+                resultado.id(), productoDTO.identificadorID(), productoDTO.categoriaID());
+        return resultado;
     }
 
     @Override
@@ -242,8 +251,6 @@ public class Fachada implements FachadaDonaciones {
         }
     }
 
-
-
     public List<ProductoDTO> obtenerTodosLosProductos() {
         return this.productoRepository.findAll().stream()
                 .map(this.productoDataMapper::toProductoDTO).toList();
@@ -251,6 +258,7 @@ public class Fachada implements FachadaDonaciones {
 
     public void eliminarProducto(String id) {
         this.productoRepository.deleteById(Long.parseLong(id));
+        log.info("Producto eliminado: id={}", id);
     }
 
     public ProductoDTO actualizarProducto(String id, ProductoDTO productoDTO) {
@@ -259,6 +267,7 @@ public class Fachada implements FachadaDonaciones {
         producto.setNombre(productoDTO.nombre());
         producto.setDescripcion(productoDTO.descripcion());
         this.productoRepository.save(producto);
+        log.info("Producto actualizado: id={}", id);
         return this.productoDataMapper.toProductoDTO(producto);
     }
 
@@ -269,7 +278,10 @@ public class Fachada implements FachadaDonaciones {
         this.verificarIdentificadorIngresado(identificadorDTO);
         val identificador = this.identificadoresDataMapper.toIdentificador(identificadorDTO);
         val guardado = this.identificadoresRepository.save(identificador);
-        return this.identificadoresDataMapper.toIdentificadorDTO(guardado);
+
+        val resultado = this.identificadoresDataMapper.toIdentificadorDTO(guardado);
+        log.info("Identificador creado: id={}", resultado.id());
+        return resultado;
     }
 
     @Override
@@ -296,6 +308,7 @@ public class Fachada implements FachadaDonaciones {
 
     public void eliminarIdentificador(String id) {
         this.identificadoresRepository.deleteById(Long.parseLong(id));
+        log.info("Identificador eliminado: id={}", id);
     }
 
     /*------------------------------------------------------------Categorias--------------------------------------------------------------------------------- */
@@ -307,7 +320,9 @@ public class Fachada implements FachadaDonaciones {
 
         cantCategoriasRegistradas.increment();
 
-        return this.categoriaDataMapper.toCategoriaDTO(guardada);
+        val resultado = this.categoriaDataMapper.toCategoriaDTO(guardada);
+        log.info("Categoría creada: id={}", resultado.id());
+        return resultado;
     }
 
     public List<CategoriaDTO> obtenerTodasLasCategorias() {
@@ -317,6 +332,7 @@ public class Fachada implements FachadaDonaciones {
 
     public void eliminarCategoria(String id) {
         this.categoriaRepository.deleteById(Long.parseLong(id));
+        log.info("Categoría eliminada: id={}", id);
     }
 
     /*------------------------------------------------------------Validaciones--------------------------------------------------------------------------------- */
@@ -332,6 +348,7 @@ public class Fachada implements FachadaDonaciones {
         try {
 
             if (!donadoresYEntidadesClient.puedeDonar(donadorID)) {
+                log.warn("Donador {} no apto para donar", donadorID);
                 throw new DonadorNoAptoException(
                         "El donador no se encuentra apto para donar");
             }
@@ -341,10 +358,12 @@ public class Fachada implements FachadaDonaciones {
             if (e.getResponseBodyAsString()
                     .contains("No existe el donador")) {
 
+                log.warn("Donador {} no encontrado en DonadoresYEntidades", donadorID);
                 throw new DonadorNoEncontradoException(
                         e.getResponseBodyAsString());
             }
 
+            log.error("Error al consultar DonadoresYEntidades para el donador {}", donadorID, e);
             throw e;
         }
     }
