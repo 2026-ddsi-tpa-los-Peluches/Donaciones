@@ -155,6 +155,7 @@ public class Fachada implements FachadaDonaciones {
     public DonacionDTO buscarDonacionPorID(String donacionID) throws NoSuchElementException {
         val donacion = this.donacionesRepository.findById(Long.parseLong(donacionID))
                 .orElseThrow(() -> new DonacionNoEncontradaException("Donación no encontrada: " + donacionID));
+        log.info("Consulta de Donacion realizada por ID con exito: donacionID={}",donacionID);
         return this.donacionesDataMapper.toDonacionDTO(donacion);
     }
 
@@ -164,12 +165,13 @@ public class Fachada implements FachadaDonaciones {
                 .orElseThrow(() -> new DonacionNoEncontradaException("Donación no encontrada: " + donacionID));
         donacion.cambiarEstado(estado);
         this.donacionesRepository.save(donacion);
-        log.info("Estado de donación cambiado: id={}, estado={}", donacionID, estado);
+        log.info("Estado de Donación cambiado: id={}, estado={}", donacionID, estado);
         return this.donacionesDataMapper.toDonacionDTO(donacion);
     }
 
     @Override
     public List<DonacionDTO> buscarPorDonadorYFechaInicio(String donadorID, LocalDate fecha) throws NoSuchElementException {
+        log.info("Consulta de donaciones por Donador y Fecha de Inicio: donacionID={} fecha={}",donadorID,fecha);
         val donaciones = this.donacionesRepository.findByDonadorIDAndFechaGreaterThanEqualOrderByFechaAsc(donadorID, fecha);
         return donaciones.stream().map(this.donacionesDataMapper::toDonacionDTO).toList();
     }
@@ -194,6 +196,7 @@ public class Fachada implements FachadaDonaciones {
     }
 
     public List<DonacionDTO> obtenerTodasLasDonaciones() {
+        log.info("Consulta de todas las Donaciones realizadas: cantidad={}", donacionesRepository.count());
         return this.donacionesRepository.findAll().stream()
                 .map(this.donacionesDataMapper::toDonacionDTO).toList();
     }
@@ -244,6 +247,7 @@ public class Fachada implements FachadaDonaciones {
             Long id = Long.parseLong(productoID);
             val producto = this.productoRepository.findById(id)
                     .orElseThrow(() -> new ProductoNoEncontradoException("Producto no encontrado: " + productoID));
+            log.info("Consulta de Producto por ID: productoID={}",productoID);
             return this.productoDataMapper.toProductoDTO(producto);
         } catch (NumberFormatException e) {
             // Si el ID no es numérico (ej: "PROD-101"), lanzamos la misma excepción
@@ -252,6 +256,7 @@ public class Fachada implements FachadaDonaciones {
     }
 
     public List<ProductoDTO> obtenerTodosLosProductos() {
+        log.info("Consulta de todos los Productos: cantidad={}", productoRepository.count());
         return this.productoRepository.findAll().stream()
                 .map(this.productoDataMapper::toProductoDTO).toList();
     }
@@ -267,7 +272,7 @@ public class Fachada implements FachadaDonaciones {
         producto.setNombre(productoDTO.nombre());
         producto.setDescripcion(productoDTO.descripcion());
         this.productoRepository.save(producto);
-        log.info("Producto actualizado: id={}", id);
+        log.info("Producto actualizado: productoID={}", id);
         return this.productoDataMapper.toProductoDTO(producto);
     }
 
@@ -286,6 +291,7 @@ public class Fachada implements FachadaDonaciones {
 
     @Override
     public IdentificadorDTO buscarIdentificadorPorID(String identificadorID) throws NoSuchElementException {
+        log.info("Consulta de Identificador por ID: identificadorID={}", identificadorID);
         val identificador = this.identificadoresRepository.findById(Long.parseLong(identificadorID))
                 .orElseThrow(() -> new IdentificadorNoEncontradoException("Identificador no encontrado: " + identificadorID));
         return this.identificadoresDataMapper.toIdentificadorDTO(identificador);
@@ -302,6 +308,7 @@ public class Fachada implements FachadaDonaciones {
     }
 
     public List<IdentificadorDTO> obtenerTodasLosIdentificadores() {
+        log.info("Consulta de todos los Identificadores: cantidad={}", identificadoresRepository.count());
         return this.identificadoresRepository.findAll().stream()
                 .map(this.identificadoresDataMapper::toIdentificadorDTO).toList();
     }
@@ -326,6 +333,7 @@ public class Fachada implements FachadaDonaciones {
     }
 
     public List<CategoriaDTO> obtenerTodasLasCategorias() {
+        log.info("Consulta de todas las Categorias: cantidad={}", categoriaRepository.count());
         return this.categoriaRepository.findAll().stream()
                 .map(this.categoriaDataMapper::toCategoriaDTO).toList();
     }
