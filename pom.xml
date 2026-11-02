@@ -61,6 +61,14 @@
       <artifactId>micrometer-registry-datadog</artifactId>
     </dependency>
 
+
+
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-json</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>com.logtail</groupId>
       <artifactId>logback-logtail</artifactId>
@@ -73,11 +81,23 @@
       <scope>runtime</scope>
     </dependency>
 
-
     <!-- Existing Dependencies -->
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-xml</artifactId>
+    </dependency>
+
+    <!-- Rabbit Para Servicio De Consultas -->
+    <dependency>
+      <groupId>com.rabbitmq</groupId>
+      <artifactId>amqp-client</artifactId>
+      <version>5.20.0</version>
+    </dependency>
+
+    <!--El conejo social -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-amqp</artifactId>
     </dependency>
 
     <dependency>
@@ -94,10 +114,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-jpa</artifactId>
-    </dependency>
 
     <!-- Spring Boot Test -->
     <dependency>

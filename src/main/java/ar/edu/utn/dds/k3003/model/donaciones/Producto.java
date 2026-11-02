@@ -25,6 +25,10 @@ public class Producto {
     private Categoria categoria;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subcategoria_id")
+    private Subcategoria subcategoria;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "identificador_id")
     private Identificador identificador;
 
