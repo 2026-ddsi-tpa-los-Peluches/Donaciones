@@ -16,6 +16,7 @@ import ar.edu.utn.dds.k3003.exceptions.donaciones.CategoriaNoEncontradaException
 import ar.edu.utn.dds.k3003.exceptions.donaciones.ProductoNoEncontradoException;
 import ar.edu.utn.dds.k3003.model.donaciones.*;
 import ar.edu.utn.dds.k3003.publisher.DonacionesPublisher;
+import ar.edu.utn.dds.k3003.publisher.DonadoresPublisher;
 import ar.edu.utn.dds.k3003.publisher.EventPublisher;
 import ar.edu.utn.dds.k3003.repositories.donaciones.categoria.CategoriaDataMapper;
 import ar.edu.utn.dds.k3003.repositories.donaciones.categoria.CategoriaRepositoryJPA;
@@ -77,9 +78,11 @@ public class Fachada implements FachadaDonaciones {
 
     //Rabiot
     private final DonacionesPublisher donacionesPublisher;
+    private final DonadoresPublisher donadoresPublisher;
 
     // Constructor vacío requerido por Spring/JPA
-    public Fachada(MeterRegistry meterRegistry, DonacionesPublisher donacionesPublisher) {
+    public Fachada(MeterRegistry meterRegistry, DonacionesPublisher donacionesPublisher,
+                   DonadoresPublisher donadoresPublisher) {
 
         this.cantDonacionesRegistradas = Counter.builder("donaciones.registradas")
                 .register(meterRegistry);
@@ -106,7 +109,10 @@ public class Fachada implements FachadaDonaciones {
                 .description("Cantidad de productos actualmente existentes")
                 .register(meterRegistry);
 
+
+        //publisher
         this.donacionesPublisher = donacionesPublisher;
+        this.donadoresPublisher = donadoresPublisher;
 
     }
 
@@ -127,9 +133,10 @@ public class Fachada implements FachadaDonaciones {
 
             val donacionGuardada = this.donacionesRepository.save(donacion);
 
-
+            //llamo al conejo
             this.donacionesPublisher.notificarDonacion(donacionGuardada);
 
+            this.donadoresPublisher.notificarActualizacionEstadoDonador(donacionGuardada);
 
             this.logisticaClient.gestionarDonacion(
                     donacionGuardada.getDepositoID(),

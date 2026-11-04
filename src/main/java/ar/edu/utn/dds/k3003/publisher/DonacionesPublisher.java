@@ -13,12 +13,10 @@ import java.time.Instant;
 @Component
 public class DonacionesPublisher {
 
-    private final RabbitTemplate rabbitTemplate;
     private final EventPublisher eventPublisher;
 
     // Inyección por constructor (recomendado en Spring)
-    public DonacionesPublisher(RabbitTemplate rabbitTemplate, EventPublisher eventPublisher) {
-        this.rabbitTemplate = rabbitTemplate;
+    public DonacionesPublisher(EventPublisher eventPublisher) {
         this.eventPublisher = eventPublisher;
     }
 
