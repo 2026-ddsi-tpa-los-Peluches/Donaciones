@@ -18,6 +18,7 @@ import ar.edu.utn.dds.k3003.model.donaciones.*;
 import ar.edu.utn.dds.k3003.publisher.DonacionesPublisher;
 import ar.edu.utn.dds.k3003.publisher.DonadoresPublisher;
 import ar.edu.utn.dds.k3003.publisher.EventPublisher;
+import ar.edu.utn.dds.k3003.publisher.ProductosPublisher;
 import ar.edu.utn.dds.k3003.repositories.donaciones.categoria.CategoriaDataMapper;
 import ar.edu.utn.dds.k3003.repositories.donaciones.categoria.CategoriaRepositoryJPA;
 import ar.edu.utn.dds.k3003.repositories.donaciones.donacion.DonacionesDataMapper;
@@ -79,10 +80,12 @@ public class Fachada implements FachadaDonaciones {
     //Rabiot
     private final DonacionesPublisher donacionesPublisher;
     private final DonadoresPublisher donadoresPublisher;
+    private final ProductosPublisher productosPublisher;
 
     // Constructor vacío requerido por Spring/JPA
     public Fachada(MeterRegistry meterRegistry, DonacionesPublisher donacionesPublisher,
-                   DonadoresPublisher donadoresPublisher) {
+                   DonadoresPublisher donadoresPublisher,
+                   ProductosPublisher productosPublisher) {
 
         this.cantDonacionesRegistradas = Counter.builder("donaciones.registradas")
                 .register(meterRegistry);
@@ -113,6 +116,7 @@ public class Fachada implements FachadaDonaciones {
         //publisher
         this.donacionesPublisher = donacionesPublisher;
         this.donadoresPublisher = donadoresPublisher;
+        this.productosPublisher = productosPublisher;
 
     }
 
@@ -254,6 +258,10 @@ public class Fachada implements FachadaDonaciones {
         val productoGuardado = this.productoRepository.save(producto);
         cantProductosRegistrados.increment();
 
+        productosPublisher.notificarProductoCreado(producto);
+
+
+
         val resultado = this.productoDataMapper.toProductoDTO(productoGuardado);
         log.info("Producto creado: id={}, identificadorID={}, categoriaID={}",
                 resultado.id(), productoDTO.identificadorID(), productoDTO.categoriaID());
@@ -282,6 +290,10 @@ public class Fachada implements FachadaDonaciones {
 
     public void eliminarProducto(String id) {
         this.productoRepository.deleteById(Long.parseLong(id));
+
+
+        productosPublisher.notificarProductoEliminado(id);
+
         log.info("Producto eliminado: id={}", id);
     }
 
@@ -291,6 +303,9 @@ public class Fachada implements FachadaDonaciones {
         producto.setNombre(productoDTO.nombre());
         producto.setDescripcion(productoDTO.descripcion());
         this.productoRepository.save(producto);
+
+        productosPublisher.notificarProductoActualizado(producto);
+
         log.info("Producto actualizado: productoID={}", id);
         return this.productoDataMapper.toProductoDTO(producto);
     }
