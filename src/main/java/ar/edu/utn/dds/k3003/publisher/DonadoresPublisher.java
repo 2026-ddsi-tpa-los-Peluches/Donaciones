@@ -3,7 +3,9 @@ package ar.edu.utn.dds.k3003.publisher;
 import ar.edu.utn.dds.k3003.events.ActualizarCantidadDonacionesEstadoEvent;
 import ar.edu.utn.dds.k3003.model.donaciones.Donacion;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.stereotype.Component;
 
+@Component
 public class DonadoresPublisher {
 
     private final EventPublisher eventPublisher;
