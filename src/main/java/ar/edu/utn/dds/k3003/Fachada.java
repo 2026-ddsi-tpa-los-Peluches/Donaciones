@@ -174,6 +174,7 @@ public class Fachada implements FachadaDonaciones {
         }
     }
 
+
     @Override
     public DonacionDTO buscarDonacionPorID(String donacionID) throws NoSuchElementException {
         val donacion = this.donacionesRepository.findById(Long.parseLong(donacionID))
@@ -375,6 +376,13 @@ public class Fachada implements FachadaDonaciones {
     public void eliminarCategoria(String id) {
         this.categoriaRepository.deleteById(Long.parseLong(id));
         log.info("Categoría eliminada: id={}", id);
+    }
+
+    public CategoriaDTO buscarCategoriaPorID(String categoriaID) throws NoSuchElementException {
+        val categoria = this.categoriaRepository.findById(Long.parseLong(categoriaID))
+                .orElseThrow(() -> new DonacionNoEncontradaException("Categoria no encontrada: " + categoriaID));
+        log.info("Consulta de Categoria realizada por ID con exito: categoriaID={}",categoriaID);
+        return this.categoriaDataMapper.toCategoriaDTO(categoria);
     }
 
     /*------------------------------------------------------------Validaciones--------------------------------------------------------------------------------- */

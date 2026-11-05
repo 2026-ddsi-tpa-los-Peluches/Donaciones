@@ -46,4 +46,15 @@ public class CategoriaController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> obtenerCategoria(@PathVariable String id) {
+        try {
+            CategoriaDTO categoria = this.fachada.buscarCategoriaPorID(id);
+            return ResponseEntity.ok(categoria);
+        } catch (CategoriaNoEncontradaException | NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error en la solicitud de la categoría.");
+        }
+    }
 }

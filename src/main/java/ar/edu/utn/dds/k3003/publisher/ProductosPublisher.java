@@ -1,8 +1,8 @@
 package ar.edu.utn.dds.k3003.publisher;
 
-import ar.edu.utn.dds.k3003.events.ProductoActualizadoEvent;
-import ar.edu.utn.dds.k3003.events.ProductoCreadoEvent;
-import ar.edu.utn.dds.k3003.events.ProductoEliminadoEvent;
+import ar.edu.utn.dds.k3003.events.productoEvents.ProductoActualizadoEvent;
+import ar.edu.utn.dds.k3003.events.productoEvents.ProductoCreadoEvent;
+import ar.edu.utn.dds.k3003.events.productoEvents.ProductoEliminadoEvent;
 import ar.edu.utn.dds.k3003.model.donaciones.Producto;
 import org.springframework.stereotype.Component;
 
@@ -57,4 +57,6 @@ public class ProductosPublisher {
         eventPublisher.publicar("producto-eliminado", evento);
         System.out.println(" Producto eliminado enviado a RabbitMQ ID: " + productoId);
     }
+
+
 }
