@@ -20,7 +20,7 @@ public class DonadoresPublisher {
                 donacion.getDonadorID(),
                 donacion.getEstado().toString()
         );
-        eventPublisher.publicar("donador-donacion-estado-exchange", evento);
+        eventPublisher.publicar("donador-donacion-estado", evento);
         System.out.println("Donador " + donacion.getDonadorID() + " realizo una donacion " + donacion.getEstado().toString());
 
 
