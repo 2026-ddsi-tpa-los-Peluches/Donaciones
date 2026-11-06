@@ -210,7 +210,12 @@ public class Fachada implements FachadaDonaciones {
         donacion.agregarQueja(descripcion);
 
         this.donacionesRepository.save(donacion);
-        this.donadoresYEntidadesClient.agregarQueja(quejaDTO);
+
+
+
+        QuejaDTO quejaDTOconID = this.donadoresYEntidadesClient.agregarQueja(quejaDTO);
+
+        donacionesPublisher.notificarDonacionConQueja(donacion, quejaDTOconID);
 
         cantQuejasRegistradas.increment();
 
