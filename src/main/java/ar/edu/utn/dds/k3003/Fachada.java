@@ -85,12 +85,14 @@ public class Fachada implements FachadaDonaciones {
     private final DonadoresPublisher donadoresPublisher;
     private final ProductosPublisher productosPublisher;
     private final CategoriaPublisher categoriaPublisher;
+    private final IdentificadorPublisher identificadorPublisher;
 
     // Constructor vacío requerido por Spring/JPA
     public Fachada(MeterRegistry meterRegistry, DonacionesPublisher donacionesPublisher,
                    DonadoresPublisher donadoresPublisher,
                    ProductosPublisher productosPublisher,
-                   CategoriaPublisher categoriaPublisher) {
+                   CategoriaPublisher categoriaPublisher,
+                   IdentificadorPublisher identificadorPublisher) {
 
         this.cantDonacionesRegistradas = Counter.builder("donaciones.registradas")
                 .register(meterRegistry);
@@ -123,6 +125,7 @@ public class Fachada implements FachadaDonaciones {
         this.donadoresPublisher = donadoresPublisher;
         this.productosPublisher = productosPublisher;
         this.categoriaPublisher = categoriaPublisher;
+        this.identificadorPublisher = g;
 
     }
 
@@ -339,6 +342,9 @@ public class Fachada implements FachadaDonaciones {
         val identificador = this.identificadoresDataMapper.toIdentificador(identificadorDTO);
         val guardado = this.identificadoresRepository.save(identificador);
 
+        identificadorPublisher.notificarIdentificadorCreado(guardado.getId() ,identificadorDTO);
+
+
         val resultado = this.identificadoresDataMapper.toIdentificadorDTO(guardado);
         log.info("Identificador creado: id={}", resultado.id());
         return resultado;
@@ -370,6 +376,9 @@ public class Fachada implements FachadaDonaciones {
 
     public void eliminarIdentificador(String id) {
         this.identificadoresRepository.deleteById(Long.parseLong(id));
+
+        identificadorPublisher.notificarIdentificadorEliminado(id);
+
         log.info("Identificador eliminado: id={}", id);
     }
 
@@ -380,7 +389,7 @@ public class Fachada implements FachadaDonaciones {
         val categoria = this.categoriaDataMapper.toCategoria(categoriaDTO);
         val guardada = this.categoriaRepository.save(categoria);
 
-        categoriaPublisher.notificarCategoriaCreada(categoriaDTO);
+        categoriaPublisher.notificarCategoriaCreada(guardada.getId(), categoriaDTO);
 
         cantCategoriasRegistradas.increment();
 

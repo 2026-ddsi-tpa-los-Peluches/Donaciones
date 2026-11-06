@@ -16,9 +16,9 @@ public class CategoriaPublisher {
         this.eventPublisher = eventPublisher;
     }
 
-    public void notificarCategoriaCreada(CategoriaDTO categoriaDTO) {
+    public void notificarCategoriaCreada(Long id,CategoriaDTO categoriaDTO) {
         CategoriaCreadaEvent evento = new CategoriaCreadaEvent(
-                categoriaDTO.id(),
+                id.toString(),
                 categoriaDTO.nombre(),
                 categoriaDTO.descripcion(),
                 Instant.now()
