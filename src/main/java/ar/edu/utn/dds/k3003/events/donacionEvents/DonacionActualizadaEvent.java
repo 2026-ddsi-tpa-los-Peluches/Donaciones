@@ -1,9 +1,8 @@
-package ar.edu.utn.dds.k3003.events;
+package ar.edu.utn.dds.k3003.events.donacionEvents;
 
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.List;
 
 public record DonacionActualizadaEvent(
         String donacionId, String donadorId, String productoId, String nombreProducto,

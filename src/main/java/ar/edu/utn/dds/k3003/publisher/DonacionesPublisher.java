@@ -2,16 +2,17 @@ package ar.edu.utn.dds.k3003.publisher;
 
 
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.QuejaDTO;
-import ar.edu.utn.dds.k3003.events.DonacionActualizadaEvent;
+import ar.edu.utn.dds.k3003.events.donacionEvents.DonacionActualizadaEvent;
 import ar.edu.utn.dds.k3003.events.donacionEvents.DonacionConQuejaRegistradaEvent;
+import ar.edu.utn.dds.k3003.events.donacionEvents.DonacionCreadaEvent;
+import ar.edu.utn.dds.k3003.events.donacionEvents.DonacionEstadoActualizadoEvent;
 import ar.edu.utn.dds.k3003.model.donaciones.Donacion;
 import ar.edu.utn.dds.k3003.model.donaciones.Producto;
-import org.springframework.amqp.core.AmqpTemplate;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 
 @Component
 public class DonacionesPublisher {
@@ -21,28 +22,6 @@ public class DonacionesPublisher {
     // Inyección por constructor (recomendado en Spring)
     public DonacionesPublisher(EventPublisher eventPublisher) {
         this.eventPublisher = eventPublisher;
-    }
-
-    public void notificarDonacion(Donacion donacion) {
-
-        Producto producto = donacion.getProducto();
-        DonacionActualizadaEvent evento = new DonacionActualizadaEvent(
-                String.valueOf(donacion.getId()),
-                donacion.getDonadorID(),
-                producto != null && producto.getId() != null ? String.valueOf(producto.getId()) : null,
-                producto != null ? producto.getNombre() : null,
-                producto != null ? producto.getCategoriaID() : null,
-                producto != null && producto.getSubcategoria() != null ? producto.getSubcategoria().getNombre() : null,
-                donacion.getCantidad(),
-                donacion.getEstado() != null ? donacion.getEstado().toString() : null,
-                Instant.now(),
-                null, //
-                Instant.now()
-        );
-
-        // Publicamos el evento al Exchange y RoutingKey correspondientes (reemplaza por tus constantes)
-        eventPublisher.publicar("donaciones", evento);
-        System.out.println("Donación enviada a RabbitMQ con ID: " + donacion.getId());
     }
 
 
@@ -58,5 +37,50 @@ public class DonacionesPublisher {
 
         eventPublisher.publicar( "donacion-queja", evento);
         System.out.println("Evento de queja enviado a RabbitMQ para la donación ID:" + donacion.getId());
+    }
+
+    public void notificarDonacionCreada(Donacion donacion) {
+
+        String nombreProd = donacion.getProducto() != null ? donacion.getProducto().getNombre() : null;
+
+        String catProd = (donacion.getProducto() != null && donacion.getProducto().getCategoria() != null)
+
+                ? donacion.getProducto().getCategoria().getNombre() : "General";
+        String subCatProd = (donacion.getProducto() != null && donacion.getProducto().getSubcategoria() != null)
+                ? donacion.getProducto().getSubcategoria().getNombre() : "General";
+
+        Instant fechaIngresoInstant = donacion.getFecha() != null
+                ? donacion.getFecha().atStartOfDay(ZoneId.systemDefault()).toInstant()
+                : Instant.now();
+
+        DonacionCreadaEvent evento = new DonacionCreadaEvent(
+                String.valueOf(donacion.getId()),
+                donacion.getDonadorID(),
+                donacion.getProducto() != null ? String.valueOf(donacion.getProducto().getId()) : null,
+                nombreProd,
+                catProd,
+                subCatProd,
+                donacion.getCantidad(),
+                donacion.getEstado() != null ? donacion.getEstado().name() : "INGRESADA",
+                fechaIngresoInstant,
+                Instant.now()
+        );
+
+        // Publicamos al exchange configurado
+        eventPublisher.publicar( "donacion-creada", evento);
+        System.out.println("Evento de donacion creada enviado a RabbitMQ para la donación ID:" + donacion.getId());
+    }
+
+
+    public void notificarEstadoCambiado(Donacion donacion) {
+        DonacionEstadoActualizadoEvent evento = new DonacionEstadoActualizadoEvent(
+                String.valueOf(donacion.getId()),
+                donacion.getEstado() != null ? donacion.getEstado().name() : "INGRESADA",
+                Instant.now()
+        );
+
+        // Publicamos al exchange configurado
+        eventPublisher.publicar("donacion-estado-actualizado", evento);
+        System.out.println("Evento de cambio de estado enviado a RabbitMQ para la donación ID: " + donacion.getId());
     }
 }

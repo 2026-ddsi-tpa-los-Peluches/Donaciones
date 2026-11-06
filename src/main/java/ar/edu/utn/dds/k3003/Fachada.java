@@ -138,7 +138,7 @@ public class Fachada implements FachadaDonaciones {
             val donacionGuardada = this.donacionesRepository.save(donacion);
 
             //llamo al conejo
-            this.donacionesPublisher.notificarDonacion(donacionGuardada);
+           this.donacionesPublisher.notificarDonacionCreada(donacionGuardada);
 
             this.donadoresPublisher.notificarActualizacionEstadoDonador(donacionGuardada);
 
@@ -189,6 +189,9 @@ public class Fachada implements FachadaDonaciones {
                 .orElseThrow(() -> new DonacionNoEncontradaException("Donación no encontrada: " + donacionID));
         donacion.cambiarEstado(estado);
         this.donacionesRepository.save(donacion);
+
+        donacionesPublisher.notificarEstadoCambiado(donacion);
+
         log.info("Estado de Donación cambiado: id={}, estado={}", donacionID, estado);
         return this.donacionesDataMapper.toDonacionDTO(donacion);
     }
