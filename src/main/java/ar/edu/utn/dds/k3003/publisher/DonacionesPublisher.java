@@ -63,7 +63,8 @@ public class DonacionesPublisher {
                 donacion.getCantidad(),
                 donacion.getEstado() != null ? donacion.getEstado().name() : "INGRESADA",
                 fechaIngresoInstant,
-                Instant.now()
+                Instant.now(),
+                donacion.getDepositoID()
         );
 
         // Publicamos al exchange configurado
