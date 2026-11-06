@@ -17,7 +17,7 @@ public class LogisticaClient {
     private final RestTemplate restTemplate = new RestTemplate();
     private final String baseUrl;
 
-    public LogisticaClient(@Value("${LOGISTICA_SERVICE_URL}") String baseUrl) {
+    public LogisticaClient(@Value("${url.logistica}") String baseUrl) {
 
         log.info("LOGISTICA URL = {}", baseUrl);
 

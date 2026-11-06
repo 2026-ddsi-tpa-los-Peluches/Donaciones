@@ -23,7 +23,7 @@ public class DonadoresYEntidadesClient {
     private final RestTemplate restTemplate = new RestTemplate();
     private final String baseUrl;
 
-    public DonadoresYEntidadesClient(@Value("${DONADORESYENTIDADES_URL}") String baseUrl) {
+    public DonadoresYEntidadesClient(@Value("${url.donadoresYEntidades}") String baseUrl) {
 
         log.info("DONADORESYENTIDADES URL = {}", baseUrl);
 
