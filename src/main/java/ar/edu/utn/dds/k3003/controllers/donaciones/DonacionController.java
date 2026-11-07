@@ -99,15 +99,15 @@ public class DonacionController {
     }
 
     @PostMapping("/{id}/queja")
-    public ResponseEntity<DonacionDTO> registrarQuejaSobreDonacion(@PathVariable String id, @RequestBody QuejaRequestDTO descripcion) {
+    public ResponseEntity<Object> registrarQuejaSobreDonacion(@PathVariable String id, @RequestBody QuejaRequestDTO descripcion) {
         try {
             String descripcionaux= descripcion.descripcion();
             DonacionDTO donacionActualizada = this.fachada.registrarQuejaEnDonacion(id,descripcionaux);
             return ResponseEntity.status(HttpStatus.CREATED).body(donacionActualizada);
         } catch (DonacionNoEncontradaException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        } catch (CambioEstadoInvalidoException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 }
