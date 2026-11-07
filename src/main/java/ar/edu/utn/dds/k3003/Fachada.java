@@ -125,7 +125,7 @@ public class Fachada implements FachadaDonaciones {
         this.donadoresPublisher = donadoresPublisher;
         this.productosPublisher = productosPublisher;
         this.categoriaPublisher = categoriaPublisher;
-        this.identificadorPublisher = g;
+        this.identificadorPublisher = identificadorPublisher;
 
     }
 
