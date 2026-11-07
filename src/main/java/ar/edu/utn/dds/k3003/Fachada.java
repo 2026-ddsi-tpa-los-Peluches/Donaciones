@@ -24,6 +24,8 @@ import ar.edu.utn.dds.k3003.repositories.donaciones.identificador.Identificadore
 import ar.edu.utn.dds.k3003.repositories.donaciones.identificador.IdentificadoresRepositoryJPA;
 import ar.edu.utn.dds.k3003.repositories.donaciones.producto.ProductoDataMapper;
 import ar.edu.utn.dds.k3003.repositories.donaciones.producto.ProductoRepositoryJPA;
+import ar.edu.utn.dds.k3003.repositories.donaciones.subCategoria.SubCategoriaDataMapper;
+import ar.edu.utn.dds.k3003.repositories.donaciones.subCategoria.SubCategoriaRepositoryJPA;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +56,9 @@ public class Fachada implements FachadaDonaciones {
     private CategoriaRepositoryJPA categoriaRepository;
 
     @Autowired
+    private SubCategoriaRepositoryJPA subCategoriaRepositoryJPA;
+
+    @Autowired
     private LogisticaClient logisticaClient;
 
     @Autowired
@@ -64,6 +69,7 @@ public class Fachada implements FachadaDonaciones {
     private final ProductoDataMapper productoDataMapper = new ProductoDataMapper();
     private final IdentificadoresDataMapper identificadoresDataMapper = new IdentificadoresDataMapper();
     private final CategoriaDataMapper categoriaDataMapper = new CategoriaDataMapper();
+    private final SubCategoriaDataMapper subCategoriaDataMapper = new SubCategoriaDataMapper();
 
     // Métricas
     private final Counter cantDonacionesRegistradas;
@@ -264,6 +270,12 @@ public class Fachada implements FachadaDonaciones {
             producto.setCategoria(categoria);
         }
 
+        if (productoDTO.subCategoriaId() != null) {
+            SubCategoria subCategoria = subCategoriaRepositoryJPA.findById(productoDTO.subCategoriaId())
+                    .orElseThrow(() -> new NoSuchElementException("Subcategoría no encontrada"));
+            producto.setSubcategoria(subCategoria);
+        }
+
         val productoGuardado = this.productoRepository.save(producto);
         cantProductosRegistrados.increment();
 
@@ -398,6 +410,28 @@ public class Fachada implements FachadaDonaciones {
         return this.categoriaDataMapper.toCategoriaDTO(categoria);
     }
 
+
+
+    public SubCategoriaDTO agregarSubCategoria(SubCategoriaDTO subCategoriaDTO) {
+        this.verificarSubCategoriaIngresada(subCategoriaDTO);
+        val subCategoria = this.subCategoriaDataMapper.toSubCategoria(subCategoriaDTO);
+
+        // Asociar la Categoria correspondiente a través del ID que viene en el DTO
+        if (subCategoriaDTO.categoriaId() != null) {
+            Categoria categoria = categoriaRepository.findById(Long.parseLong(subCategoriaDTO.categoriaId()))
+                    .orElseThrow(() -> new CategoriaNoEncontradaException("Categoría no encontrada"));
+            subCategoria.setCategoria(categoria);
+        }
+
+        val guardado = this.subCategoriaRepositoryJPA.save(subCategoria);
+
+        val resultado = this.subCategoriaDataMapper.toSubCategoriaDTO(guardado);
+        log.info("SubCategoria creada: id={}", resultado.id());
+        return resultado;
+    }
+
+
+
     /*------------------------------------------------------------Validaciones--------------------------------------------------------------------------------- */
 
     private void verificarDonacionIngresada(DonacionDTO donacionDTO) {
@@ -442,6 +476,14 @@ public class Fachada implements FachadaDonaciones {
             throw new DonacionInvalidaException("Identificador inválido");
         }
     }
+
+    private void verificarSubCategoriaIngresada(SubCategoriaDTO subCategoriaDTO) {
+        if (subCategoriaDTO == null || subCategoriaDTO.id() != null) {
+            throw new DonacionInvalidaException("Identificador inválido");
+        }
+    }
+
+
 
     private void verificarCategoriaIngresada(CategoriaDTO categoriaDTO) {
         if (categoriaDTO == null || categoriaDTO.id() != null) {

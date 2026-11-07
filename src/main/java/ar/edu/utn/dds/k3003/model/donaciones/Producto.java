@@ -26,7 +26,7 @@ public class Producto {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subcategoria_id")
-    private Subcategoria subcategoria;
+    private SubCategoria subcategoria;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "identificador_id")

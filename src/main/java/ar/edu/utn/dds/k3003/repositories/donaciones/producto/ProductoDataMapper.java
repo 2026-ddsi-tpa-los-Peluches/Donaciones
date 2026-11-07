@@ -17,7 +17,8 @@ public class ProductoDataMapper {
                 producto.getNombre(),
                 producto.getDescripcion(),
                 producto.getCategoriaID(),
-                producto.getIdentificador() != null ? producto.getIdentificador().getId().toString() : null
+                producto.getIdentificador() != null ? producto.getIdentificador().getId().toString() : null,
+                producto.getSubcategoria().getId()
         );
     }
 }

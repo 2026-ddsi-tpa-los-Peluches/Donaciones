@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "subcategorias")
-public class Subcategoria {
+public class SubCategoria {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +29,7 @@ public class Subcategoria {
     private Categoria categoria;
 
     // Constructor corregido con el nombre de la clase
-    public Subcategoria(String nombre, String descripcion, Categoria categoria) {
+    public SubCategoria(String nombre, String descripcion, Categoria categoria) {
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.categoria = categoria;
