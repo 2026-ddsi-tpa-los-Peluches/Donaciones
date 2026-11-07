@@ -13,6 +13,7 @@ import ar.edu.utn.dds.k3003.exceptions.donaciones.DonadorNoAptoException;
 import ar.edu.utn.dds.k3003.exceptions.donaciones.DonacionNoEncontradaException;
 import ar.edu.utn.dds.k3003.exceptions.donaciones.IdentificadorNoEncontradoException;
 import ar.edu.utn.dds.k3003.exceptions.donaciones.CategoriaNoEncontradaException;
+import ar.edu.utn.dds.k3003.exceptions.donaciones.SubCategoriaNoEncontradaException;
 import ar.edu.utn.dds.k3003.exceptions.donaciones.ProductoNoEncontradoException;
 import ar.edu.utn.dds.k3003.model.donaciones.*;
 import ar.edu.utn.dds.k3003.publisher.*;
@@ -437,6 +438,24 @@ public class Fachada implements FachadaDonaciones {
         val resultado = this.subCategoriaDataMapper.toSubCategoriaDTO(guardado);
         log.info("SubCategoria creada: id={}", resultado.id());
         return resultado;
+    }
+
+    public List<SubCategoriaDTO> obtenerTodasLasSubCategorias() {
+        log.info("Consulta de todas las SubCategorias: cantidad={}", subCategoriaRepositoryJPA.count());
+        return this.subCategoriaRepositoryJPA.findAll().stream()
+                .map(this.subCategoriaDataMapper::toSubCategoriaDTO).toList();
+    }
+
+    public void eliminarSubCategoria(String id) {
+        this.subCategoriaRepositoryJPA.deleteById(Long.parseLong(id));
+        log.info("SubCategoria eliminada: id={}", id);
+    }
+
+    public SubCategoriaDTO buscarSubCategoriaPorID(String subCategoriaID) throws NoSuchElementException {
+        val subCategoria = this.subCategoriaRepositoryJPA.findById(Long.parseLong(subCategoriaID))
+                .orElseThrow(() -> new SubCategoriaNoEncontradaException("SubCategoria no encontrada: " + subCategoriaID));
+        log.info("Consulta de SubCategoria realizada por ID con exito: subCategoriaID={}", subCategoriaID);
+        return this.subCategoriaDataMapper.toSubCategoriaDTO(subCategoria);
     }
 
 

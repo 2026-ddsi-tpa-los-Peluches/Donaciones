@@ -138,6 +138,11 @@
               <artifactId>lombok</artifactId>
             </exclude>
           </excludes>
+          <!-- Solo afecta "mvn spring-boot:run" (dev local). Render corre el jar empaquetado
+               via Dockerfile con "java -jar app.jar" sin este plugin, asi que no lo toca. -->
+          <profiles>
+            <profile>local</profile>
+          </profiles>
         </configuration>
       </plugin>
       <plugin>
