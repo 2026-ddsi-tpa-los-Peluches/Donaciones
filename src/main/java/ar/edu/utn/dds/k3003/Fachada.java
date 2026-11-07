@@ -87,13 +87,15 @@ public class Fachada implements FachadaDonaciones {
     private final ProductosPublisher productosPublisher;
     private final CategoriaPublisher categoriaPublisher;
     private final IdentificadorPublisher identificadorPublisher;
+    private final SubCategoriaPublisher subCategoriaPublisher;
 
     // Constructor vacío requerido por Spring/JPA
     public Fachada(MeterRegistry meterRegistry, DonacionesPublisher donacionesPublisher,
                    DonadoresPublisher donadoresPublisher,
                    ProductosPublisher productosPublisher,
                    CategoriaPublisher categoriaPublisher,
-                   IdentificadorPublisher identificadorPublisher) {
+                   IdentificadorPublisher identificadorPublisher,
+                   SubCategoriaPublisher subCategoriaPublisher) {
 
         this.cantDonacionesRegistradas = Counter.builder("donaciones.registradas")
                 .register(meterRegistry);
@@ -127,7 +129,7 @@ public class Fachada implements FachadaDonaciones {
         this.productosPublisher = productosPublisher;
         this.categoriaPublisher = categoriaPublisher;
         this.identificadorPublisher = identificadorPublisher;
-
+        this.subCategoriaPublisher = subCategoriaPublisher;
     }
 
     /*------------------------------------------------------------Donaciones--------------------------------------------------------------------------------- */
@@ -421,6 +423,8 @@ public class Fachada implements FachadaDonaciones {
     }
 
 
+    // ----------------------------------- SUBCATEGORIA ----------------------------------------------------------
+
 
     public SubCategoriaDTO agregarSubCategoria(SubCategoriaDTO subCategoriaDTO) {
         this.verificarSubCategoriaIngresada(subCategoriaDTO);
@@ -434,6 +438,8 @@ public class Fachada implements FachadaDonaciones {
         }
 
         val guardado = this.subCategoriaRepositoryJPA.save(subCategoria);
+
+        subCategoriaPublisher.notificarSubCategoriaCreada(guardado);
 
         val resultado = this.subCategoriaDataMapper.toSubCategoriaDTO(guardado);
         log.info("SubCategoria creada: id={}", resultado.id());
