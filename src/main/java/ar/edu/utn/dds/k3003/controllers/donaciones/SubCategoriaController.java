@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @RestController
-@RequestMapping("/identificadores")
+@RequestMapping("/subcategorias")
 public class SubCategoriaController {
 
     private Fachada fachada;
