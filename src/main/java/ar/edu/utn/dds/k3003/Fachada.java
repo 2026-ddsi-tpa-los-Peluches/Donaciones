@@ -247,6 +247,9 @@ public class Fachada implements FachadaDonaciones {
 
     public void eliminarDonacion(String id) {
         this.donacionesRepository.deleteById(Long.parseLong(id));
+
+        donacionesPublisher.notificarDonacionEliminada(id);
+
         log.info("Donación eliminada: id={}", id);
     }
 

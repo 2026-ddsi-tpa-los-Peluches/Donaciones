@@ -2,10 +2,7 @@ package ar.edu.utn.dds.k3003.publisher;
 
 
 import ar.edu.utn.dds.k3003.catedra.dtos.donadoresYEntidades.QuejaDTO;
-import ar.edu.utn.dds.k3003.events.donacionEvents.DonacionActualizadaEvent;
-import ar.edu.utn.dds.k3003.events.donacionEvents.DonacionConQuejaRegistradaEvent;
-import ar.edu.utn.dds.k3003.events.donacionEvents.DonacionCreadaEvent;
-import ar.edu.utn.dds.k3003.events.donacionEvents.DonacionEstadoActualizadoEvent;
+import ar.edu.utn.dds.k3003.events.donacionEvents.*;
 import ar.edu.utn.dds.k3003.model.donaciones.Donacion;
 import ar.edu.utn.dds.k3003.model.donaciones.Producto;
 import org.springframework.stereotype.Component;
@@ -83,5 +80,11 @@ public class DonacionesPublisher {
         // Publicamos al exchange configurado
         eventPublisher.publicar("donacion-estado-actualizado", evento);
         System.out.println("Evento de cambio de estado enviado a RabbitMQ para la donación ID: " + donacion.getId());
+    }
+
+    public void notificarDonacionEliminada(String donacionId) {
+        DonacionEliminadaEvent evento = new DonacionEliminadaEvent(donacionId);
+        eventPublisher.publicar("donacion-eliminada", evento);
+        System.out.println("Donación eliminada enviada a RabbitMQ con ID: " + donacionId);
     }
 }
