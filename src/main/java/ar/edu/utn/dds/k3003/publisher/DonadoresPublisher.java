@@ -1,8 +1,11 @@
 package ar.edu.utn.dds.k3003.publisher;
 
+import ar.edu.utn.dds.k3003.catedra.dtos.donaciones.EstadoDonacionEnum;
 import ar.edu.utn.dds.k3003.events.donadorEvents.ActualizarCantidadDonacionesEstadoEvent;
 import ar.edu.utn.dds.k3003.model.donaciones.Donacion;
 import org.springframework.stereotype.Component;
+
+import java.time.Instant;
 
 @Component
 public class DonadoresPublisher {
@@ -14,16 +17,15 @@ public class DonadoresPublisher {
         this.eventPublisher = eventPublisher;
     }
 
-    public void notificarActualizacionEstadoDonador(Donacion donacion){
+    public void notificarActualizacionEstadoDonador(Donacion donacion, String estadoAnterior){
         ActualizarCantidadDonacionesEstadoEvent evento = new ActualizarCantidadDonacionesEstadoEvent(
                 donacion.getDonadorID(),
-                donacion.getEstado().toString()
+                estadoAnterior,
+                donacion.getEstado().toString(),
+                Instant.now()
         );
         eventPublisher.publicar("donador-donacion-estado", evento);
         System.out.println("Donador " + donacion.getDonadorID() + " realizo una donacion " + donacion.getEstado().toString());
-
-
-
     }
 
 }

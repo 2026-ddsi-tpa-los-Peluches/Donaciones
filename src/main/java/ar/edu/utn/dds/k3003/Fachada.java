@@ -152,7 +152,7 @@ public class Fachada implements FachadaDonaciones {
             //llamo al conejo
            this.donacionesPublisher.notificarDonacionCreada(donacionGuardada);
 
-            this.donadoresPublisher.notificarActualizacionEstadoDonador(donacionGuardada);
+            this.donadoresPublisher.notificarActualizacionEstadoDonador(donacionGuardada, "");
 
             this.logisticaClient.gestionarDonacion(
                     donacionGuardada.getDepositoID(),
@@ -199,12 +199,17 @@ public class Fachada implements FachadaDonaciones {
     public DonacionDTO cambiarEstadoDeDonacion(String donacionID, EstadoDonacionEnum estado) throws NoSuchElementException {
         val donacion = this.donacionesRepository.findById(Long.parseLong(donacionID))
                 .orElseThrow(() -> new DonacionNoEncontradaException("Donación no encontrada: " + donacionID));
+
+
+        EstadoDonacionEnum estadoAnterior = donacion.getEstado();
+
+
         donacion.cambiarEstado(estado);
         this.donacionesRepository.save(donacion);
 
         this.donacionesPublisher.notificarEstadoCambiado(donacion);
 
-        this.donadoresPublisher.notificarActualizacionEstadoDonador(donacion);
+        this.donadoresPublisher.notificarActualizacionEstadoDonador(donacion, estadoAnterior.toString());
 
         log.info("Estado de Donación cambiado: id={}, estado={}", donacionID, estado);
         return this.donacionesDataMapper.toDonacionDTO(donacion);
@@ -224,6 +229,8 @@ public class Fachada implements FachadaDonaciones {
 
         QuejaDTO quejaDTO = new QuejaDTO(null, donacionID, donacion.getDonadorID(), LocalDate.now(), descripcion);
 
+        EstadoDonacionEnum estadoAnterior = donacion.getEstado();
+
         donacion.agregarQueja(descripcion);
 
         this.donacionesRepository.save(donacion);
@@ -233,6 +240,9 @@ public class Fachada implements FachadaDonaciones {
         QuejaDTO quejaDTOconID = this.donadoresYEntidadesClient.agregarQueja(quejaDTO);
 
         donacionesPublisher.notificarDonacionConQueja(donacion, quejaDTOconID);
+
+        this.donadoresPublisher.notificarActualizacionEstadoDonador(donacion, estadoAnterior.toString());
+
 
         cantQuejasRegistradas.increment();
 
