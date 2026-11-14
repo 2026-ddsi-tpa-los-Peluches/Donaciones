@@ -202,7 +202,9 @@ public class Fachada implements FachadaDonaciones {
         donacion.cambiarEstado(estado);
         this.donacionesRepository.save(donacion);
 
-        donacionesPublisher.notificarEstadoCambiado(donacion);
+        this.donacionesPublisher.notificarEstadoCambiado(donacion);
+
+        this.donadoresPublisher.notificarActualizacionEstadoDonador(donacion);
 
         log.info("Estado de Donación cambiado: id={}, estado={}", donacionID, estado);
         return this.donacionesDataMapper.toDonacionDTO(donacion);
